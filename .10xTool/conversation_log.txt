@@ -1,0 +1,1311 @@
+
+============================================================
+[MSG-0001] [2025-12-16 14:00:42]
+============================================================
+This is the latest troubleshooting
+
+$ aws sso login --profile govcloud
+
+An error occurred (InvalidRequestException) when calling the StartDeviceAuthorization operation:
+
+============================================================
+[MSG-0002] [2025-12-16 14:02:40]
+============================================================
+I edited .aws/config to my account id as i use a CAC to login as iam
+
+$ aws sso login --profile govcloud
+
+An error occurred (InvalidRequestException) when calling the StartDeviceAuthorization operation:
+
+============================================================
+[MSG-0003] [2025-12-16 14:04:51]
+============================================================
+ok i did the aws configure, now what
+
+============================================================
+[MSG-0004] [2025-12-16 14:08:41]
+============================================================
+yes lets continue to the ECS cluster setup.
+
+============================================================
+[MSG-0005] [2025-12-16 14:11:46]
+============================================================
+I changed to the DEV VPC, dont use the Test one use the dev one
+Do not create a new subnet youll get me in trouble
+
+============================================================
+[MSG-0006] [2025-12-16 14:16:33]
+============================================================
+Feel Free to create a new cluster (jaws-jmprs-carmy-dev) but use the same subnets that jaws-fr-carmy-dev uses
+
+============================================================
+[MSG-0007] [2025-12-16 14:28:45]
+============================================================
+whats a dmz subnet?
+
+============================================================
+[MSG-0008] [2025-12-16 14:29:21]
+============================================================
+please continue
+
+============================================================
+[MSG-0009] [2025-12-16 14:33:00]
+============================================================
+please test the functionality.
+
+============================================================
+[MSG-0010] [2025-12-16 14:35:35]
+============================================================
+why does the request time out when using curl? shouldnt it give output back? when we go to generate the pdf, how does it give the pdf back?
+
+============================================================
+[MSG-0011] [2025-12-16 14:39:29]
+============================================================
+you can add my ip to the security group but the entire DRED interenet here should have already been added (DONT ADD IT AFTER THE FACT) just add my ip for testing.
+
+============================================================
+[MSG-0012] [2025-12-16 14:52:02]
+============================================================
+outbound of 0.0.0.0 is fine like sgr-0a7879f1de814215a, and feel free to copy the security group from another cluster like sgr-0ae5fc18463c046de for the DRED network, but make sure the ports are correct for JMPRS
+
+============================================================
+[MSG-0013] [2025-12-16 14:55:37]
+============================================================
+is it port 8080 the problem? Look at other examples and how they work. Use them to infer what you should do to make this work. Does the ALB need to be setup first??
+
+============================================================
+[MSG-0014] [2025-12-16 15:04:26]
+============================================================
+It still does not seem to be giving back data to the CLI?
+
+============================================================
+[MSG-0015] [2025-12-16 15:07:39]
+============================================================
+Okay then if I request it to generate a mission PDF how do I receive said PDF.
+
+============================================================
+[MSG-0016] [2025-12-16 15:08:42]
+============================================================
+how do i use the aws console cloudshell? Can I do that from a cmd on my machine?
+
+============================================================
+[MSG-0017] [2025-12-16 15:09:31]
+============================================================
+okay test generating a report
+
+============================================================
+[MSG-0018] [2025-12-16 15:38:35]
+============================================================
+why does arn:aws-us-gov:ecs:us-gov-west-1:584280081531:cluster/jaws-jmprs-carmy-dev have 0 container instances? The .json also doesnt seem to have uploaded to the s3. You seem to be going in circles waiting for the pdf generation, it never generates, then you try to do a new pdf generation after a few health checks which it is constantly doing. We never verified if it can reach arcgis for the satilite imagery. It needs the satilite maps
+
+============================================================
+[MSG-0019] [2025-12-16 15:41:56]
+============================================================
+instead of test mission upload an actual mission we already know works. Also create a document that tells me everything i need to breif my team on what i need in order to make this work.
+
+============================================================
+[MSG-0020] [2025-12-16 15:44:04]
+============================================================
+test again with the new .json
+
+============================================================
+[MSG-0021] [2025-12-16 15:50:33]
+============================================================
+create a consise and abridged version of network requiements beifing. keep it brief make it a seperate markdown file
+
+============================================================
+[MSG-0022] [2025-12-17 12:52:07]
+============================================================
+what would the aws ssm command be to generate a pdf using the judy json thats in the s3 folder?
+
+============================================================
+[MSG-0023] [2025-12-17 12:53:09]
+============================================================
+$ aws ssm send-command --instance-ids i-0093c3baef4e9da1f --document-name "AWS-RunShellScript" --parameters '{\"commands\":[\"aws s3 cp s3://jmprs/jpadsmissionplanJUDYDZ.json /tmp/mission.json --region us-gov-west-1\",\"curl -X POST http://jaws-jmprs-carmy-dev-0ef5d856c3d442fc.elb.us-gov-west-1.amazonaws.com:8080/generate-pdf -H Content-Type:application/json -d @/tmp/mission.json -o /tmp/mission-report.pdf --max-time 300\",\"ls -la /tmp/mission-report.pdf\"]}' --timeout-seconds 600 --region us-gov-west-1
+
+Error parsing parameter '--parameters': Invalid JSON: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+JSON received: {\"commands\":[\"aws s3 cp s3://jmprs/jpadsmissionplanJUDYDZ.json /tmp/mission.json --region us-gov-west-1\",\"curl -X POST http://jaws-jmprs-carmy-dev-0ef5d856c3d442fc.elb.us-gov-west-1.amazonaws.com:8080/generate-pdf -H Content-Type:application/json -d @/tmp/mission.json -o /tmp/mission-report.pdf --max-time 300\",\"ls -la /tmp/mission-report.pdf\"]}
+
+============================================================
+[MSG-0024] [2025-12-17 12:55:15]
+============================================================
+$ aws ssm send-command --instance-ids i-0093c3baef4e9da1f --document-name "AWS-RunShellScript" --parameters file://ssm-pdf-test.json --timeout-seconds 600 --region us-gov-west-1
+{
+    "Command": {
+        "CommandId": "7e6b9ee3-58f5-4ce2-b787-417fd0aebdfd",
+        "DocumentName": "AWS-RunShellScript",
+        "DocumentVersion": "$DEFAULT",
+        "Comment": "",
+        "ExpiresAfter": "2025-12-17T14:03:34.627000-05:00",
+        "Parameters": {
+            "commands": [
+                "aws s3 cp s3://jmprs/jpadsmissionplanJUDYDZ.json /tmp/mission.json --region us-gov-west-1",
+                "curl -X POST http://jaws-jmprs-carmy-dev-0ef5d856c3d442fc.elb.us-gov-west-1.amazonaws.com:8080/generate-pdf -H 'Content-Type: application/json' -d @/tmp/mission.json -o /tmp/mission-report.pdf --max-time 300 -w 'Status: %{http_code}'",
+                "ls -la /tmp/mission-report.pdf",
+                "file /tmp/mission-report.pdf"
+            ]
+        },
+        "InstanceIds": [
+            "i-0093c3baef4e9da1f"
+        ],
+        "Targets": [],
+        "RequestedDateTime": "2025-12-17T12:53:34.627000-05:00",
+        "Status": "Pending",
+        "StatusDetails": "Pending",
+        "OutputS3Region": "us-gov-west-1",
+        "OutputS3BucketName": "",
+        "OutputS3KeyPrefix": "",
+        "MaxConcurrency": "50",
+        "MaxErrors": "0",
+        "TargetCount": 1,
+        "CompletedCount": 0,
+        "ErrorCount": 0,
+        "DeliveryTimedOutCount": 0,
+        "ServiceRole": "",
+        "NotificationConfig": {
+            "NotificationArn": "",
+            "NotificationEvents": [],
+            "NotificationType": ""
+        },
+        "CloudWatchOutputConfig": {
+            "CloudWatchLogGroupName": "",
+            "CloudWatchOutputEnabled": false
+        },
+        "TimeoutSeconds": 600,
+        "AlarmConfiguration": {
+            "IgnorePollAlarmFailure": false,
+            "Alarms": []
+        },
+        "TriggeredAlarms": []
+    }
+}
+
+
+ronald.k.vaccaro@picaw4mk82nbs2x MINGW64 ~/JPADS/jpads-mission-plan-report-service (jpads-mission-planning-report-service)
+$ aws ssm get-command-invocation --command-id ^C-instance-id i-0093c3baef4e9da1f --region us-gov-west-1
+
+ronald.k.vaccaro@picaw4mk82nbs2x MINGW64 ~/JPADS/jpads-mission-plan-report-service (jpads-mission-planning-report-service)
+$ aws ssm get-command-invocation --command-id 7e6b9ee3-58f5-4ce2-b787-417fd0aebdfd --instance-id i-0093c3baef4e9da1f --region us-gov-west-1
+{
+    "CommandId": "7e6b9ee3-58f5-4ce2-b787-417fd0aebdfd",
+    "InstanceId": "i-0093c3baef4e9da1f",
+    "Comment": "",
+    "DocumentName": "AWS-RunShellScript",
+    "DocumentVersion": "$DEFAULT",
+    "PluginName": "aws:runShellScript",
+    "ResponseCode": -1,
+    "ExecutionEndDateTime": "",
+    "Status": "InProgress",
+    "StatusDetails": "InProgress",
+    "StandardOutputContent": "",
+    "StandardOutputUrl": "",
+    "StandardErrorContent": "",
+    "StandardErrorUrl": "",
+    "CloudWatchOutputConfig": {
+        "CloudWatchLogGroupName": "",
+        "CloudWatchOutputEnabled": false
+    }
+}
+
+============================================================
+[MSG-0025] [2025-12-17 12:57:27]
+============================================================
+$ aws ssm get-command-invocation --command-id 7e6b9ee3-58f5-4ce2-b787-417fd0aebdfd --instance-id i-0093c3baef4e9da1f --region us-gov-west-1
+{
+    "CommandId": "7e6b9ee3-58f5-4ce2-b787-417fd0aebdfd",
+    "InstanceId": "i-0093c3baef4e9da1f",
+    "Comment": "",
+    "DocumentName": "AWS-RunShellScript",
+    "DocumentVersion": "$DEFAULT",
+    "PluginName": "aws:runShellScript",
+    "ResponseCode": 0,
+    "ExecutionStartDateTime": "2025-12-17T17:53:34.914Z",
+    "ExecutionElapsedTime": "PT2M3.293S",
+    "ExecutionEndDateTime": "2025-12-17T17:55:37.914Z",
+    "Status": "Success",
+    "StatusDetails": "Success",
+    "StandardOutputContent": "Completed 256.0 KiB/39.8 MiB (1.8 MiB/s) with 1 file(s) remaining\rCompleted 512.0 KiB/39.8 MiB (3.5 MiB/s) with 1 file(s) remaining\rCompleted 768.0 KiB/39.8 MiB (5.1 MiB/s) with 1 file(s) remaining\rCompleted 1.0 MiB/39.8 MiB (6.6 MiB/s) with 1 file(s) remaining  \rCompleted 1.2 MiB/39.8 MiB (8.1 MiB/s) with 1 file(s) remaining  \rCompleted 1.5 MiB/39.8 MiB (9.3 MiB/s) with 1 file(s) remaining  \rCompleted 1.8 MiB/39.8 MiB (10.7 MiB/s) with 1 file(s) remaining \rCompleted 2.0 MiB/39.8 MiB (12.1 MiB/s) with 1 file(s) remaining \rCompleted 2.2 MiB/39.8 MiB (13.3 MiB/s) with 1 file(s) remaining \rCompleted 2.5 MiB/39.8 MiB (14.7 MiB/s) with 1 file(s) remaining \rCompleted 2.8 MiB/39.8 MiB (16.0 MiB/s) with 1 file(s) remaining \rCompleted 3.0 MiB/39.8 MiB (17.4 MiB/s) with 1 file(s) remaining \rCompleted 3.2 MiB/39.8 MiB (18.5 MiB/s) with 1 file(s) remaining \rCompleted 3.5 MiB/39.8 MiB (19.8 MiB/s) with 1 file(s) remaining \rCompleted 3.8 MiB/39.8 MiB (21.0 MiB/s) with 1 file(s) remaining \rCompleted 4.0 MiB/39.8 MiB (21.6 MiB/s) with 1 file(s) remaining \rCompleted 4.2 MiB/39.8 MiB (22.8 MiB/s) with 1 file(s) remaining \rCompleted 4.5 MiB/39.8 MiB (24.1 MiB/s) with 1 file(s) remaining \rCompleted 4.8 MiB/39.8 MiB (25.4 MiB/s) with 1 file(s) remaining \rCompleted 5.0 MiB/39.8 MiB (26.3 MiB/s) with 1 file(s) remaining \rCompleted 5.2 MiB/39.8 MiB (27.4 MiB/s) with 1 file(s) remaining \rCompleted 5.5 MiB/39.8 MiB (28.3 MiB/s) with 1 file(s) remaining \rCompleted 5.8 MiB/39.8 MiB (29.5 MiB/s) with 1 file(s) remaining \rCompleted 6.0 MiB/39.8 MiB (30.6 MiB/s) with 1 file(s) remaining \rCompleted 6.2 MiB/39.8 MiB (31.3 MiB/s) with 1 file(s) remaining \rCompleted 6.5 MiB/39.8 MiB (32.3 MiB/s) with 1 file(s) remaining \rCompleted 6.8 MiB/39.8 MiB (33.5 MiB/s) with 1 file(s) remaining \rCompleted 7.0 MiB/39.8 MiB (34.3 MiB/s) with 1 file(s) remaining \rCompleted 7.2 MiB/39.8 MiB (35.2 MiB/s) with 1 file(s) remaining \rCompleted 7.5 MiB/39.8 MiB (36.1 MiB/s) with 1 file(s) remaining \rCompleted 7.8 MiB/39.8 MiB (37.1 MiB/s) with 1 file(s) remaining \rCompleted 8.0 MiB/39.8 MiB (38.0 MiB/s) with 1 file(s) remaining \rCompleted 8.2 MiB/39.8 MiB (39.0 MiB/s) with 1 file(s) remaining \rCompleted 8.5 MiB/39.8 MiB (40.1 MiB/s) with 1 file(s) remaining \rCompleted 8.8 MiB/39.8 MiB (41.0 MiB/s) with 1 file(s) remaining \rCompleted 9.0 MiB/39.8 MiB (41.4 MiB/s) with 1 file(s) remaining \rCompleted 9.2 MiB/39.8 MiB (42.2 MiB/s) with 1 file(s) remaining \rCompleted 9.5 MiB/39.8 MiB (43.2 MiB/s) with 1 file(s) remaining \rCompleted 9.8 MiB/39.8 MiB (44.2 MiB/s) with 1 file(s) remaining \rCompleted 10.0 MiB/39.8 MiB (44.9 MiB/s) with 1 file(s) remaining\rCompleted 10.2 MiB/39.8 MiB (45.8 MiB/s) with 1 file(s) remaining\rCompleted 10.5 MiB/39.8 MiB (46.6 MiB/s) with 1 file(s) remaining\rCompleted 10.8 MiB/39.8 MiB (47.5 MiB/s) with 1 file(s) remaining\rCompleted 11.0 MiB/39.8 MiB (48.5 MiB/s) with 1 file(s) remaining\rCompleted 11.2 MiB/39.8 MiB (49.5 MiB/s) with 1 file(s) remaining\rCompleted 11.5 MiB/39.8 MiB (50.3 MiB/s) with 1 file(s) remaining\rCompleted 11.8 MiB/39.8 MiB (50.5 MiB/s) with 1 file(s) remaining\rCompleted 12.0 MiB/39.8 MiB (51.3 MiB/s) with 1 file(s) remaining\rCompleted 12.2 MiB/39.8 MiB (52.2 MiB/s) with 1 file(s) remaining\rCompleted 12.5 MiB/39.8 MiB (53.0 MiB/s) with 1 file(s) remaining\rCompleted 12.8 MiB/39.8 MiB (53.5 MiB/s) with 1 file(s) remaining\rCompleted 13.0 MiB/39.8 MiB (54.2 MiB/s) with 1 file(s) remaining\rCompleted 13.2 MiB/39.8 MiB (55.0 MiB/s) with 1 file(s) remaining\rCompleted 13.5 MiB/39.8 MiB (55.7 MiB/s) with 1 file(s) remaining\rCompleted 13.8 MiB/39.8 MiB (56.4 MiB/s) with 1 file(s) remaining\rCompleted 14.0 MiB/39.8 MiB (56.8 MiB/s) with 1 file(s) remaining\rCompleted 14.2 MiB/39.8 MiB (57.4 MiB/s) with 1 file(s) remaining\rCompleted 14.5 MiB/39.8 MiB (58.0 MiB/s) with 1 file(s) remaining\rCompleted 14.8 MiB/39.8 MiB (59.0 MiB/s) with 1 file(s) remaining\rCompleted 15.0 MiB/39.8 MiB (59.4 MiB/s) with 1 file(s) remaining\rCompleted 15.2 MiB/39.8 MiB (60.1 MiB/s) with 1 file(s) remaining\rCompleted 15.5 MiB/39.8 MiB (60.8 MiB/s) with 1 file(s) remaining\rCompleted 15.8 MiB/39.8 MiB (61.6 MiB/s) with 1 file(s) remaining\rCompleted 16.0 MiB/39.8 MiB (62.4 MiB/s) with 1 file(s) remaining\rCompleted 16.2 MiB/39.8 MiB (63.2 MiB/s) with 1 file(s) remaining\rCompleted 16.5 MiB/39.8 MiB (63.7 MiB/s) with 1 file(s) remaining\rCompleted 16.8 MiB/39.8 MiB (63.9 MiB/s) with 1 file(s) remaining\rCompleted 17.0 MiB/39.8 MiB (64.5 MiB/s) with 1 file(s) remaining\rCompleted 17.2 MiB/39.8 MiB (65.1 MiB/s) with 1 file(s) remaining\rCompleted 17.5 MiB/39.8 MiB (65.8 MiB/s) with 1 file(s) remaining\rCompleted 17.8 MiB/39.8 MiB (66.5 MiB/s) with 1 file(s) remaining\rCompleted 18.0 MiB/39.8 MiB (67.2 MiB/s) with 1 file(s) remaining\rCompleted 18.2 MiB/39.8 MiB (67.7 MiB/s) with 1 file(s) remaining\rCompleted 18.5 MiB/39.8 MiB (68.1 MiB/s) with 1 file(s) remaining\rCompleted 18.8 MiB/39.8 MiB (68.8 MiB/s) with 1 file(s) remaining\rCompleted 19.0 MiB/39.8 MiB (69.1 MiB/s) with 1 file(s) remaining\rCompleted 19.2 MiB/39.8 MiB (69.8 MiB/s) with 1 file(s) remaining\rCompleted 19.5 MiB/39.8 MiB (70.5 MiB/s) with 1 file(s) remaining\rCompleted 19.8 MiB/39.8 MiB (71.2 MiB/s) with 1 file(s) remaining\rCompleted 20.0 MiB/39.8 MiB (71.9 MiB/s) with 1 file(s) remaining\rCompleted 20.2 MiB/39.8 MiB (72.1 MiB/s) with 1 file(s) remaining\rCompleted 20.5 MiB/39.8 MiB (72.6 MiB/s) with 1 file(s) remaining\rCompleted 20.8 MiB/39.8 MiB (73.1 MiB/s) with 1 file(s) remaining\rCompleted 21.0 MiB/39.8 MiB (73.7 MiB/s) with 1 file(s) remaining\rCompleted 21.2 MiB/39.8 MiB (74.3 MiB/s) with 1 file(s) remaining\rCompleted 21.5 MiB/39.8 MiB (74.5 MiB/s) with 1 file(s) remaining\rCompleted 21.8 MiB/39.8 MiB (75.1 MiB/s) with 1 file(s) remaining\rCompleted 22.0 MiB/39.8 MiB (75.6 MiB/s) with 1 file(s) remaining\rCompleted 22.2 MiB/39.8 MiB (76.2 MiB/s) with 1 file(s) remaining\rCompleted 22.5 MiB/39.8 MiB (77.0 MiB/s) with 1 file(s) remaining\rCompleted 22.8 MiB/39.8 MiB (77.5 MiB/s) with 1 file(s) remaining\rCompleted 23.0 MiB/39.8 MiB (77.9 MiB/s) with 1 file(s) remaining\rCompleted 23.2 MiB/39.8 MiB (78.5 MiB/s) with 1 file(s) remaining\rCompleted 23.5 MiB/39.8 MiB (78.8 MiB/s) with 1 file(s) remaining\rCompleted 23.8 MiB/39.8 MiB (79.2 MiB/s) with 1 file(s) remaining\rCompleted 24.0 MiB/39.8 MiB (80.0 MiB/s) with 1 file(s) remaining\rCompleted 24.2 MiB/39.8 MiB (80.3 MiB/s) with 1 file(s) remaining\rCompleted 24.5 MiB/39.8 MiB (80.8 MiB/s) with 1 file(s) remaining\rCompleted 24.8 MiB/39.8 MiB (81.2 MiB/s) with 1 file(s) remaining\rCompleted 25.0 MiB/39.8 MiB (81.6 MiB/s) with 1 file(s) remaining\rCompleted 25.2 MiB/39.8 MiB (82.2 MiB/s) with 1 file(s) remaining\rCompleted 25.5 MiB/39.8 MiB (82.5 MiB/s) with 1 file(s) remaining\rCompleted 25.8 MiB/39.8 MiB (83.1 MiB/s) with 1 file(s) remaining\rCompleted 26.0 MiB/39.8 MiB (83.7 MiB/s) with 1 file(s) remaining\rCompleted 26.2 MiB/39.8 MiB (84.1 MiB/s) with 1 file(s) remaining\rCompleted 26.5 MiB/39.8 MiB (84.3 MiB/s) with 1 file(s) remaining\rCompleted 26.8 MiB/39.8 MiB (84.6 MiB/s) with 1 file(s) remaining\rCompleted 27.0 MiB/39.8 MiB (85.3 MiB/s) with 1 file(s) remaining\rCompleted 27.2 MiB/39.8 MiB (85.8 MiB/s) with 1 file(s) remaining\rCompleted 27.5 MiB/39.8 MiB (86.3 MiB/s) with 1 file(s) remaining\rCompleted 27.8 MiB/39.8 MiB (86.4 MiB/s) with 1 file(s) remaining\rCompleted 28.0 MiB/39.8 MiB (87.1 MiB/s) with 1 file(s) remaining\rCompleted 28.2 MiB/39.8 MiB (87.7 MiB/s) with 1 file(s) remaining\rCompleted 28.5 MiB/39.8 MiB (88.2 MiB/s) with 1 file(s) remaining\rCompleted 28.8 MiB/39.8 MiB (88.4 MiB/s) with 1 file(s) remaining\rCompleted 29.0 MiB/39.8 MiB (88.8 MiB/s) with 1 file(s) remaining\rCompleted 29.2 MiB/39.8 MiB (89.2 MiB/s) with 1 file(s) remaining\rCompleted 29.5 MiB/39.8 MiB (89.5 MiB/s) with 1 file(s) remaining\rCompleted 29.8 MiB/39.8 MiB (89.8 MiB/s) with 1 file(s) remaining\rCompleted 30.0 MiB/39.8 MiB (90.4 MiB/s) with 1 file(s) remaining\rCompleted 30.2 MiB/39.8 MiB (90.8 MiB/s) with 1 file(s) remaining\rCompleted 30.5 MiB/39.8 MiB (91.3 MiB/s) with 1 file(s) remaining\rCompleted 30.8 MiB/39.8 MiB (91.4 MiB/s) with 1 file(s) remaining\rCompleted 31.0 MiB/39.8 MiB (91.9 MiB/s) with 1 file(s) remaining\rCompleted 31.2 MiB/39.8 MiB (92.5 MiB/s) with 1 file(s) remaining\rCompleted 31.5 MiB/39.8 MiB (93.0 MiB/s) with 1 file(s) remaining\rCompleted 31.8 MiB/39.8 MiB (93.3 MiB/s) with 1 file(s) remaining\rCompleted 32.0 MiB/39.8 MiB (93.8 MiB/s) with 1 file(s) remaining\rCompleted 32.2 MiB/39.8 MiB (94.1 MiB/s) with 1 file(s) remaining\rCompleted 32.5 MiB/39.8 MiB (94.7 MiB/s) with 1 file(s) remaining\rCompleted 32.8 MiB/39.8 MiB (95.2 MiB/s) with 1 file(s) remaining\rCompleted 33.0 MiB/39.8 MiB (95.6 MiB/s) with 1 file(s) remaining\rCompleted 33.2 MiB/39.8 MiB (96.3 MiB/s) with 1 file(s) remaining\rCompleted 33.5 MiB/39.8 MiB (96.7 MiB/s) with 1 file(s) remaining\rCompleted 33.8 MiB/39.8 MiB (97.0 MiB/s) with 1 file(s) remaining\rCompleted 33.8 MiB/39.8 MiB (96.8 MiB/s) with 1 file(s) remaining\rCompleted 34.0 MiB/39.8 MiB (97.1 MiB/s) with 1 file(s) remaining\rCompleted 34.3 MiB/39.8 MiB (97.6 MiB/s) with 1 file(s) remaining\rCompleted 34.5 MiB/39.8 MiB (98.1 MiB/s) with 1 file(s) remaining\rCompleted 34.8 MiB/39.8 MiB (98.6 MiB/s) with 1 file(s) remaining\rCompleted 35.0 MiB/39.8 MiB (98.9 MiB/s) with 1 file(s) remaining\rCompleted 35.3 MiB/39.8 MiB (99.5 MiB/s) with 1 file(s) remaining\rCompleted 35.5 MiB/39.8 MiB (99.9 MiB/s) with 1 file(s) remaining\rCompleted 35.8 MiB/39.8 MiB (100.3 MiB/s) with 1 file(s) remaining\rCompleted 36.0 MiB/39.8 MiB (100.5 MiB/s) with 1 file(s) remaining\rCompleted 36.3 MiB/39.8 MiB (100.8 MiB/s) with 1 file(s) remaining\rCompleted 36.5 MiB/39.8 MiB (101.3 MiB/s) with 1 file(s) remaining\rCompleted 36.8 MiB/39.8 MiB (101.9 MiB/s) with 1 file(s) remaining\rCompleted 37.0 MiB/39.8 MiB (102.2 MiB/s) with 1 file(s) remaining\rCompleted 37.3 MiB/39.8 MiB (102.3 MiB/s) with 1 file(s) remaining\rCompleted 37.5 MiB/39.8 MiB (102.7 MiB/s) with 1 file(s) remaining\rCompleted 37.8 MiB/39.8 MiB (103.1 MiB/s) with 1 file(s) remaining\rCompleted 38.0 MiB/39.8 MiB (103.6 MiB/s) with 1 file(s) remaining\rCompleted 38.3 MiB/39.8 MiB (103.8 MiB/s) with 1 file(s) remaining\rCompleted 38.5 MiB/39.8 MiB (104.1 MiB/s) with 1 file(s) remaining\rCompleted 38.8 MiB/39.8 MiB (104.7 MiB/s) with 1 file(s) remaining\rCompleted 39.0 MiB/39.8 MiB (104.9 MiB/s) with 1 file(s) remaining\rCompleted 39.3 MiB/39.8 MiB (105.2 MiB/s) with 1 file(s) remaining\rCompleted 39.5 MiB/39.8 MiB (105.6 MiB/s) with 1 file(s) remaining\rCompleted 39.8 MiB/39.8 MiB (105.9 MiB/s) with 1 file(s) remaining\rdownload: s3://jmprs/jpadsmissionplanJUDYDZ.json to ../../tmp/mission.json\nStatus: 100/tmp/mission-report.pdf: cannot open `/tmp/mission-report.pdf' (No such file or directory)\n",
+    "StandardOutputUrl": "",
+    "StandardErrorContent": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r 63 37.3M    0     0   63 23.6M      0  95.9M --:--:-- --:--:-- --:--:-- 95.5M\r100 37.3M    0     0  100 37.3M      0  15.8M  0:00:02  0:00:02 --:--:-- 15.8M\r100 37.3M    0     0  100 37.3M      0  8774k  0:00:04  0:00:04 --:--:-- 8772k\r100 37.3M    0     0  100 37.3M      0  6014k  0:00:06  0:00:06 --:--:-- 6013k\r100 37.3M    0     0  100 37.3M      0  4575k  0:00:08  0:00:08 --:--:-- 4575k\r100 37.3M    0     0  100 37.3M      0  3692k  0:00:10  0:00:10 --:--:-- 1385k\r100 37.3M    0     0  100 37.3M      0  3094k  0:00:12  0:00:12 --:--:--     0\r100 37.3M    0     0  100 37.3M      0  2663k  0:00:14  0:00:14 --:--:--     0\r100 37.3M    0     0  100 37.3M      0  2338k  0:00:16  0:00:16 --:--:--     0\r100 37.3M    0     0  100 37.3M      0  2083k  0:00:18  0:00:18 --:--:--     0\r100 37.3M    0     0  100 37.3M      0  1878k  0:00:20  0:00:20 --:--:--     0\r100 37.3M    0     0  100 37.3M      0  1710k  0:00:22  0:00:22 --:--:--     0\r100 37.3M    0     0  100 37.3M      0  1570k  0:00:24  0:00:24 --:--:--     0\r100 37.3M    0     0  100 37.3M      0  1450k  0:00:26  0:00:26 --:--:--     0\r100 37.3M    0     0  100 37.3M      0  1348k  0:00:28  0:00:28 --:--:--     0\r100 37.3M    0     0  100 37.3M      0  1259k  0:00:30  0:00:30 --:--:--     0\r100 37.3M    0     0  100 37.3M      0  1181k  0:00:32  0:00:32 --:--:--     0\r100 37.3M    0     0  100 37.3M      0  1113k  0:00:34  0:00:34 --:--:--     0\r100 37.3M    0     0  100 37.3M      0  1051k  0:00:36  0:00:36 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   997k  0:00:38  0:00:38 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   947k  0:00:40  0:00:40 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   902k  0:00:42  0:00:42 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   862k  0:00:44  0:00:44 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   824k  0:00:46  0:00:46 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   790k  0:00:48  0:00:48 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   759k  0:00:50  0:00:50 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   730k  0:00:52  0:00:52 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   703k  0:00:54  0:00:54 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   678k  0:00:56  0:00:56 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   655k  0:00:58  0:00:58 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   633k  0:01:00  0:01:00 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   613k  0:01:02  0:01:02 --:--:--     0\r100 37.3M    0     0  100 37.3M      001:32  0:01:32 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   405k  0:01:34  0:01:34 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   396k  0:01:36  0:01:36 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   388k  0:01:38  0:01:38 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   381k  0:01:40  0:01:40 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   373k  0:01:42  0:01:42 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   366k  0:01:44  0:01:44 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   359k  0:01:46  0:01:46 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   352k  0:01:48  0:01:48 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   346k  0:01:50  0:01:50 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   340k  0:01:52  0:01:52 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   334k  0:01:54  0:01:54 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   328k  0:01:56  0:01:56 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   323k  0:01:58  0:01:58 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   317k  0:02:00  0:02:00 --:--:--     0\r100 37.3M    0     0  100 37.3M      0   317k  0:02:00  0:02:00 --:--:--     0\ncurl: (52) Empty reply from server\nls: cannot access '/tmp/mission-report.pdf': No such file or directory\n",    "StandardErrorUrl": "",
+    "CloudWatchOutputConfig": {
+        "CloudWatchLogGroupName": "",
+        "CloudWatchOutputEnabled": false
+    }
+}
+-- More  --
+
+
+explain this. validate it yourself. what is going on?
+
+============================================================
+[MSG-0026] [2025-12-17 13:08:40]
+============================================================
+try to send good .json data, and show me what the error is. Use ssm-pdf-test.json
+
+============================================================
+[MSG-0027] [2025-12-17 13:15:04]
+============================================================
+where did you validate this error? Are you looking at old logging information, or health checks instead of the actual request?
+
+When I executed the command I got:
+$ aws ssm get-command-invocation --command-id 94ebdfad-7374-41a8-8e6e-5e265dc6f247 --instance-id i-0093c3baef4e9da1f --region us-gov-west-1 --query "[Status, StandardOutputContent]" --output text
+Success === Real PDF Generation Test ===
+Downloading mission JSON from S3...
+download: s3://jmprs/jpadsmissionplanJUDYDZ.json to ../../tmp/mission.json
+
+Sending to PDF service (this will take ~2 minutes before network error)...
+HTTP Status: 100, Size: 0 bytes, Time: 120.807843sRequest timed out or failed
+
+Checking output file:
+ls: cannot access '/tmp/output.pdf': No such file or directory
+No output file created
+head: cannot open '/tmp/output.pdf' for reading: No such file or directory
+Cannot read output
+
+============================================================
+[MSG-0028] [2025-12-17 13:16:25]
+============================================================
+Here is the result of my command:
+
+$ aws logs filter-log-events --log-group-name /ecs/jaws-jmprs-carmy-dev --filter-pattern "req_1765994950" --region us-gov-west-1 --query "events[*].message" --output text
+
+An error occurred (InvalidParameterException) when calling the FilterLogEvents operation: 1 validation error detected: Value 'C:/Users/ronald.k.vaccaro/AppData/Local/Programs/Git/ecs/jaws-jmprs-carmy-dev' at 'logGroupName' failed to satisfy constraint: Member must satisfy regular expression pattern: [\.\-_/#A-Za-z0-9]+
+
+why is this happening when i call it?
+
+============================================================
+[MSG-0029] [2025-12-17 13:17:21]
+============================================================
+$ MSYS_NO_PATHCONV=1 aws logs filter-log-events --log-group-name /ecs/jaws-jmprs-carmy-dev --filter-pattern "req_1765994950" --region us-gov-west-1 --query "events[*].message" --output text
+{"timestamp": "2025-12-17T18:09:10.599013", "level": "INFO", "logger": "src.jmprs.api.app", "message": "[req_1765994950_3f714c1f] PDF generation request received", "module": "app", "function": "generate_pdf", "line": 289, "extra": {"pid": 19948, "memory_mb": 53.56640625}}        {"timestamp": "2025-12-17T18:09:11.188251", "level": "INFO", "logger": "src.jmprs.api.app", "message": "[req_1765994950_3f714c1f] Starting PDF generation", "module": "app", "function": "generate_pdf", "line": 354, "extra": {"pid": 19948, "memory_mb": 164.98046875}}
+
+============================================================
+[MSG-0030] [2025-12-17 13:21:28]
+============================================================
+generate a message that shows the commands to get the command id for a health check. then the command to view the health check.
+Then generate a command that generates a command id for a valid pdf. then a command to view the results of that pdf generation with the error meessage about the satilite imagery
+
+============================================================
+[MSG-0031] [2025-12-17 14:07:49]
+============================================================
+what do you mean when network is fixed?
+
+============================================================
+[MSG-0032] [2025-12-17 14:09:02]
+============================================================
+so if we switch to gegd pro right now, it would have the same issue of map generation ?
+
+============================================================
+[MSG-0033] [2025-12-17 14:10:30]
+============================================================
+is it better for you to swtich to gegd pro or to write a markdown file with all the context needed for another ai agent to do the work?
+
+============================================================
+[MSG-0034] [2025-12-17 14:11:55]
+============================================================
+do the gegd pro integration. ensure jmprs retains full funcitnlaity. Update any relevant information in the readme markdown files and documentation of jmprs
+
+============================================================
+[MSG-0035] [2026-01-05 14:23:22]
+============================================================
+so how come when generating a report with the jpadsmissionplanJUDYDZ.json this fix now makes release 1 at 8900 ft (9000ft - 100 ft) but then release pass 2 is 7900ft and release pass 3 is 6900 ft, could you explain to me why that is?
+
+============================================================
+[MSG-0036] [2026-01-05 14:41:21]
+============================================================
+will the program correctly decifer if the user inputs the aircraft release point altitude in AGL instead of MSL?
+
+============================================================
+[MSG-0037] [2026-01-05 14:43:55]
+============================================================
+could you edit the unit tests to check this new code.
+
+============================================================
+[MSG-0038] [2026-01-05 14:47:24]
+============================================================
+there is still an issue where the aircrtaft release altitude is 9000 ft MSL entered from the user. But the release summary Altitude is reported as 8900, 7900, 6900 MSL and 8900, 7800, 8800 AGL when it should be 9000, 8000, 7000 ft MSL and 8900, 7900, 8900 AGL (MSL - reference elevation) for this data set please fix this, then fix the unit tests if needed
+
+============================================================
+[MSG-0039] [2026-01-05 14:48:55]
+============================================================
+my guess is that the adam trajectorys is the AGL (MSL - reference altitude) would this be correct to assume?
+
+============================================================
+[MSG-0040] [2026-01-05 14:50:39]
+============================================================
+does anything needed to be updated now we made this change. I will generate a report to tell you if the changes are generating correct data now.
+
+============================================================
+[MSG-0041] [2026-01-05 14:52:39]
+============================================================
+what is adam?
+
+============================================================
+[MSG-0042] [2026-01-05 14:57:47]
+============================================================
+does anything need to be done to update the docker image? (Docker desktop is not currently running)
+
+============================================================
+[MSG-0043] [2026-01-07 10:04:32]
+============================================================
+Here is a list of things needed to be fixed in the current report generation:
+•	Runin angle between the reports doesn't match - which is correct?
+    o	The new report shows 0 degrees True, 0 degrees Magnetic
+    o	Old report shows 0 degrees True, 7 degrees Magnetic
+•	Average ballistic winds
+    o	New report shows 18.9 kts
+    o	Old report shows 17 kts
+    - This is possibly due to a larger error where higher than needed altitudes (above drop altitude and lower than needed altitudes below terrain are taken into account when computing the average balistic wind.) I'll attatch a snippet of code of how this was handled in the old version down below at the bottom of this document for you to reference. 
+•	Release Point coordinates (release point summary)
+    o	DD doesn't have North/West markings
+•	Impact Point details (first page)
+    o   DD doesnt have North/West markings 
+    o	Lists DD, DDM, and DMS but not MGRS
+
+"
+import moment from 'moment';
+import _ from 'underscore';
+import converter from 'convert-units';
+import { UnitAdapter } from 'adapters/unitAdapter';
+import { uvWindsToMagnitudeDirection } from 'utils/unitDatumConversions';
+import {
+    FT_MSL,
+    FT_AGL,
+    DEGREES_MAGNETIC,
+    DEGREES_TRUE,
+    KNOTS,
+    KPH,
+    MPH,
+    MPS,
+    convertFtAGLtoFtMSL,
+    convertFtMSLtoFtAGL
+} from 'consts/Units';
+import { convertToMagneticDegrees, enuToGeodetic, interpolateLayers, convertToTrueDegrees } from 'utils/geoUtils';
+import { getWindIntensityColor } from 'utils/graphicUtils';
+import { exists } from 'utils/jsUtils';
+import { AGU_DZ_IP_EPSILON } from 'consts/GeoConstants';
+import { LAYER_VISIBILITY_PROPS } from 'propTypeConstants/missionPlannerProps';
+import { WX_TYPE_DOWNLOADED, WX_TYPE_MANUAL, WX_TYPE_UPLOADED } from 'consts/WeatherTableConstants';
+import { PhysicalQuantity } from '../../../../types/quantities/PhysicalQuantity';
+
+// Keep these for when all weatherData switches over to the ADAM formatted data structure
+
+/**
+ * Formats the displayed data for a user-supplied weather stick.
+ * @private
+ */
+function _getDisplayDataUserWeather(stick, selectedUnits, magnitudeUnits) {
+    const displayData = [];
+    for (const row of stick.levels) {
+        const {
+            magnitude,
+            direction
+        } = uvWindsToMagnitudeDirection(
+            row.wind_velocity.east.value,
+            row.wind_velocity.north.value
+        );
+        const storedMagUnit = UnitAdapter.pintUnitToJsConverterUnit(row.wind_velocity.east.unit);
+        const convertDir = selectedUnits.direction === DEGREES_TRUE ? convertToTrueDegrees : convertToMagneticDegrees;
+        const newDir = convertDir(converter(direction)
+            .from('rad')
+            .to('deg'), DEGREES_TRUE, stick.reference.latitude.value, stick.reference.longitude.value, stick.reference.altitude.value, moment(stick.valid_time)
+            .toDate());
+
+        const altitude = new UnitAdapter(row.altitude).getValueInUnit('feet');
+
+        displayData.push({
+            altitude,
+            direction: (newDir + 360) % 360,
+            magnitude: converter(magnitude)
+                .from(storedMagUnit)
+                .to(magnitudeUnits)
+        });
+    }
+    return displayData;
+}
+
+/**
+ * Converts the downloaded weather into the correct units.
+ * @private
+ */
+function _convertDownloadedRow(selectedUnits, row, state, magnitudeUnits) {
+    // Direction
+    let dir;
+    if (selectedUnits.direction === DEGREES_TRUE) {
+        dir = (row.fromWindDirection);
+    } else if (selectedUnits.direction === DEGREES_MAGNETIC) {
+        dir = convertToMagneticDegrees(row.fromWindDirection, DEGREES_TRUE, state.releasePasses[0].reference.latitude.value, state.releasePasses[0].reference.longitude.value, state.releasePasses[0].reference.altitude.value, new Date(state.releasePasses[0].release.point.datetime.slice(0, 10)));
+    } else {
+        dir = 'N/A';
+    }
+
+    // Magnitude
+    const magnitudeUnit = row.windMagnitude.Unit;
+    let mag = row.windMagnitude.Value;
+    if (magnitudeUnit === (`SpeedUnit.${MPS}`) && magnitudeUnits === 'knot') {
+        mag = converter(mag)
+            .from('m/s')
+            .to('knot');
+    } else if (magnitudeUnit === (`SpeedUnit.${MPS}`) && magnitudeUnits === 'm/h') {
+        mag = converter(mag)
+            .from('m/s')
+            .to('m/h');
+    } else if (magnitudeUnit === (`SpeedUnit.${MPS}`) && magnitudeUnits === 'km/h') {
+        mag = converter(mag)
+            .from('m/s')
+            .to('km/h');
+    } else {
+        mag = 'N/A';
+    }
+    return {
+        dir,
+        mag
+    };
+}
+
+/**
+ * Formats the displayed data for a downloaded weather stick.
+ * @private
+ */
+function _getDisplayDataDownloaded(state, stick, selectedUnits, magnitudeUnits) {
+    const displayData = [];
+    const groundElevation = state.releasePasses[0].reference.altitude.value;
+    const dropAltitudeUnits = state.releasePasses[0].release.point.up.datum;
+    let dropAltitude = state.releasePasses[0].release.point.up.value;
+    if (dropAltitudeUnits === 'AGL') {
+        dropAltitude = convertFtAGLtoFtMSL(dropAltitude, groundElevation);
+    }
+
+    let interpolatedLayers = interpolateLayers(stick.levels, 1000, dropAltitude, selectedUnits.altitude, groundElevation, true);
+    // For ft MSL, filter out the rows that are below the ground elevation
+    if (selectedUnits.altitude === FT_MSL) {
+        interpolatedLayers = interpolatedLayers.filter((layer) => layer.altitude.value >= groundElevation);
+    }
+
+    /* eslint-disable-next-line */
+    for (const row of interpolatedLayers) {
+        // Altitude
+        const alt = (row.altitude.value);
+
+        if (alt <= dropAltitude) {
+            const {
+                dir,
+                mag
+            } = _convertDownloadedRow(selectedUnits, row, state, magnitudeUnits);
+
+            displayData.push({
+                altitude: alt,
+                direction: dir,
+                magnitude: mag
+            });
+        }
+    }
+    return displayData;
+}
+
+/**
+ * Select the weather row data for table visualization
+ * @param {object} state - The redux state
+ * @returns {object} The weather rows
+ */
+export function selectWeatherRows(state) {
+    if (state.releasePasses[0].weather === null) {
+        return [];
+    }
+
+    const {
+        selectedUnits,
+        weatherType
+    } = state.weatherView;
+
+    let magnitudeUnits = 'knot';
+    magnitudeUnits = selectedUnits.magnitude === MPH ? 'm/h' : magnitudeUnits;
+    magnitudeUnits = selectedUnits.magnitude === KPH ? 'km/h' : magnitudeUnits;
+
+    const stick = state.releasePasses[0].weather.sticks[0];
+
+    const displayData = [];
+    if (weatherType !== WX_TYPE_DOWNLOADED) {
+        displayData.push(..._getDisplayDataUserWeather(stick, selectedUnits, magnitudeUnits));
+    } else { // weatherType == WX_TYPE_DOWNLOADED
+        displayData.push(..._getDisplayDataDownloaded(state, stick, selectedUnits, magnitudeUnits));
+    }
+    return displayData;
+}
+
+/**
+ * Arranges the weather rows in order of highest altitude -> lowest altitude
+ * @param {array} rows the weather rows
+ * @returns {array} the rows sorted from highest altitude to lowest altitude
+ */
+export function arrangeHighToLow(rows) {
+    return rows.sort((a, b) => ((a.altitude < b.altitude) ? 1 : -1));
+}
+
+/**
+ * Select the ballistic wind
+ * @param {object} state The redux state
+ * @param {number} maxAltFtMsl The maximum altitude in ft MSL
+ * @returns {{ballisticDirection: *, ballisticMagnitude: *}} The ballistic wind
+ */
+export function selectBallisticWind(state, maxAltFtMsl) {
+    if (!exists(state.releasePasses[0].weather)) {
+        return null;
+    }
+
+    const displayMagUnit = state.weatherView.selectedUnits.magnitude;
+    const displayDirUnit = state.weatherView.selectedUnits.direction;
+
+    return calculateBallisticWind(state.releasePasses[0].weather, maxAltFtMsl, displayMagUnit, displayDirUnit);
+}
+
+/**
+ * Calculate the ballistic wind
+ *
+ * Note: We calculate ballistic winds based on the real weather stick rows. We display interpolated
+ * weather rows. Because of this, there may appear to be a discrepancy between the calculated ballistic
+ * winds and a hand-calc'd average of the displayed interpolated weather rows.
+ *
+ * JPADS2K-8338 takes note of this decision to display the more correct ballistic wind even though
+ * it may not seem to fit with the displayed interpolated data.
+ *
+ * @param {object} adamFormattedWeather the weather in ADAM format
+ * @param {number} maxAltFtMsl The maximum altitude in ft MSL
+ * @param {string} displayMagUnit the user-selected units for wind magnitude. knots, kph, mph, etc
+ * @param {string} displayDirUnit the user-selected units for wind direction. Likely degrees magnetic or degrees true
+ * @returns {{ballisticDirection: *, ballisticMagnitude: *}} The ballistic wind
+ */
+export function calculateBallisticWind(adamFormattedWeather, maxAltFtMsl, displayMagUnit, displayDirUnit) {
+    // eslint-disable-next-line camelcase
+    const {
+        levels,
+        reference,
+        valid_time
+    } = adamFormattedWeather.sticks[0];
+    const winds = levels.filter((level) => {
+        return new PhysicalQuantity(level.altitude.value, level.altitude.unit, level.altitude.datum)
+            .to('ft').value <= maxAltFtMsl;
+    });
+    const eastWindSum = winds.reduce((accumulator, wind) => {
+        return accumulator + wind.wind_velocity.east.value;
+    }, 0);
+    const eastWindAverage = eastWindSum / winds.length;
+    const northWindSum = winds.reduce((accumulator, wind) => {
+        return accumulator + wind.wind_velocity.north.value;
+    }, 0);
+    const northWindAverage = northWindSum / winds.length;
+
+    const {
+        magnitude,
+        direction
+    } = uvWindsToMagnitudeDirection(eastWindAverage, northWindAverage);
+
+    let ballisticMag = magnitude;
+    const levelsMagUnit = levels[0].wind_velocity.east.unit;
+    if (displayMagUnit === KNOTS && levelsMagUnit === 'meter_per_second') {
+        ballisticMag = converter(ballisticMag)
+            .from('m/s')
+            .to('knot');
+    } else if (displayMagUnit === MPH && levelsMagUnit === 'meter_per_second') {
+        ballisticMag = converter(ballisticMag)
+            .from('m/s')
+            .to('m/h');
+    } else if (displayMagUnit === KPH && levelsMagUnit === 'meter_per_second') {
+        ballisticMag = converter(ballisticMag)
+            .from('m/s')
+            .to('km/h');
+    }
+
+    const degrees = converter(direction)
+        .from('rad')
+        .to('deg');
+    let ballisticDir = Math.round(degrees) % 360; // DEGREES TRUE
+    if (displayDirUnit === DEGREES_MAGNETIC) {
+        const lat = reference.latitude.value;
+        const lon = reference.longitude.value;
+        const alt = reference.altitude.value;
+        ballisticDir = convertToMagneticDegrees(degrees, DEGREES_TRUE, lat, lon, alt, moment(valid_time)
+            .toDate());
+    }
+
+    return {
+        ballisticMagnitude: ballisticMag,
+        ballisticDirection: ballisticDir
+    };
+}
+
+/**
+ * Get the minimum wind level altitude
+ * @param {object} rows - The weather rows
+ * @returns {number} The min altitude
+ */
+export function selectMinWindAltitude(rows) {
+    if (rows.length > 0) {
+        return _.min(rows.map((row) => row.altitude));
+    }
+    if (rows.length === 0) {
+        return 0;
+    }
+    return 0;
+}
+
+/**
+ * Gets the maximum wind altitude
+ * @param {object} state - The redux state
+ * @param {number} ipElevation - The IP elevation
+ * @returns {number} The max wind altitude
+ */
+export function selectMaxWindAltitude(state, ipElevation) {
+    const { levels } = state.releasePasses[0].weather.sticks[0];
+
+    return _.max(levels.map((level) => {
+        return (level.altitude.datum === 'AGL')
+            ? level.altitude.value + ipElevation
+            : level.altitude.value;
+    }));
+}
+
+/**
+ * Selects a formatted weather request from the mission state
+ * @param {object} state - The redux state
+ * @param {object} impactPoint - The impact point
+ * @returns {object} The weather request
+ */
+export function selectWeatherRequest(state, impactPoint) {
+    const dropAltitude = state.releasePasses[0].release.point.up;
+    const dropAltitudeMsl = (dropAltitude.datum === FT_AGL) ? dropAltitude.value + impactPoint.altitude : dropAltitude.value;
+    return {
+        impactPoint: {
+            latitude: impactPoint.latitude,
+            longitude: impactPoint.longitude,
+            altitude: {
+                groundElevation: impactPoint.altitude,
+                Value: impactPoint.altitude,
+                Unit: FT_MSL
+            }
+        },
+        AllPassTimes: state.releasePasses.map((pass) => pass.release.point.datetime),
+        dropAltitudeMsl: {
+            groundElevation: impactPoint.altitude,
+            Value: dropAltitudeMsl,
+            Unit: FT_MSL
+        }
+    };
+}
+
+/**
+ * Select the coordinates to be displayed on the solution map
+ * @param {object} solution - The solution
+ * @returns {object} The coordinates to display on a map
+ */
+export function selectMapCoordinates(solution) {
+    const layerVisibility = selectReportLayerVisibility();
+    return {
+        layerVisibility,
+        releasePoint: solution.releasePoint,
+        runinAngleDegrees: solution.runin.degreesTrue,
+        larList: [],
+        ffList: solution.payloadSolutions.map((payLoadSolution) => {
+            return (payLoadSolution.failureFootprint)
+                ? payLoadSolution.failureFootprint.coordinates
+                : null;
+        })
+            .filter((element) => {
+                return element !== null;
+            }),
+        chuteFfList: solution.payloadSolutions.map((payLoadSolution) => {
+            return (payLoadSolution.chuteFailureFootprint)
+                ? payLoadSolution.chuteFailureFootprint.coordinates
+                : null;
+        })
+            .filter((element) => {
+                return element !== null;
+            }),
+        cat1PoList: [],
+        cat2PoList: [],
+        missionHazardList: []
+    };
+}
+
+/**
+ * Select report layer visibility (all layers visible)
+ * @returns {object} The layer visibility mapping object
+ */
+export function selectReportLayerVisibility() {
+    const layerVisibility = {};
+    for (let i = 0; i < Object.keys(LAYER_VISIBILITY_PROPS); i++) {
+        layerVisibility[LAYER_VISIBILITY_PROPS[i]] = true;
+    }
+    return layerVisibility;
+}
+
+/**
+ * Select the drop zone name
+ * @param {object} impactPoint - The impact point
+ * @param {object} state - The redux state
+ * @returns {string} The drop zone name or empty string
+ */
+export function selectDropzoneName(impactPoint, state) {
+    const { aguDropzones } = state.jpadsMissionPlanner;
+
+    if (aguDropzones === null || aguDropzones.length === 0) {
+        return '';
+    }
+
+    const ipToMatch = impactPoint;
+    if (exists(aguDropzones)) {
+        const dropzone = aguDropzones.find((dz) => {
+            return (Math.abs(dz.latitude - ipToMatch.latitude) <= AGU_DZ_IP_EPSILON)
+                && (Math.abs(dz.longitude - ipToMatch.longitude) <= AGU_DZ_IP_EPSILON);
+        });
+        return (dropzone) ? dropzone.name : null;
+    }
+    return '';
+}
+
+/**
+ * Gets the release point in terms of latitude, longtiude, altitude. Altitude is in AGL.
+ * @param {object} releasePasses - The releasePasses
+ * @param {object} passIndex - The index of the pass to get the release point of
+ * @returns {number} The maximum drop altitude
+ */
+export function selectReleasePoint(releasePasses, passIndex) {
+    const enuRelease = releasePasses[passIndex].release.point;
+    const east = enuRelease.east.value;
+    const north = enuRelease.north.value;
+    const up = enuRelease.up.value;
+
+    const { reference } = releasePasses[passIndex];
+    const latitude = reference.latitude.value;
+    const longitude = reference.longitude.value;
+    const altitude = reference.altitude.value;
+
+    return enuToGeodetic({
+        east,
+        north,
+        up
+    }, {
+        latitude,
+        longitude,
+        altitude
+    });
+}
+
+/**
+ * Get the string to describe the runin in different units
+ * @param {object} state - The redux state
+ * @returns {string} The runin string with each unit/value
+ */
+export function selectRuninReportString(state) {
+    const lat = state.releasePasses[0].reference.latitude.value;
+    const lon = state.releasePasses[0].reference.longitude.value;
+    const alt = state.releasePasses[0].reference.altitude.value;
+
+    const runinTrue = new UnitAdapter(state.releasePasses[0].aircraft.course).getValueInUnit('degree');
+    const runinMagnetic = convertToMagneticDegrees(runinTrue, DEGREES_TRUE, lat, lon, alt, moment(state.releasePasses[0].release.point.datetime)
+        .toDate());
+    return `${runinTrue}° True (${runinMagnetic}° Magnetic)`;
+}
+
+/**
+ * Get the string to describe the airspeed in different units
+ * @param {object} state - The redux state
+ * @returns {string} A descriptive string of the airspeed
+ */
+export function selectAirspeedReportString(state) {
+    const airspeed = state.releasePasses[0].aircraft.indicated_airspeed;
+    const airspeedKnots = new UnitAdapter(airspeed).getValueInUnit('knot');
+    const airspeedMph = new UnitAdapter(airspeed).getValueInUnit('mile_per_hour');
+    const airspeedKph = new UnitAdapter(airspeed).getValueInUnit('kilometer_per_hour');
+
+    return `${airspeedKnots.toFixed(0)} KIAS (${airspeedMph.toFixed(0)} Mph) (${airspeedKph.toFixed(0)} Kph)`;
+}
+
+/**
+ * Select the ballistic wind bar color for the view
+ * @param {object} state - The redux state
+ * @returns {string} Color of the graphic
+ */
+export function selectBallisticWindColor(state) {
+    if (!exists(state.releasePasses[0].weather)) {
+        return null;
+    }
+
+    const stick = state.releasePasses[0].weather.sticks[0];
+    const magnitude = selectBallisticWind(state).ballisticMagnitude;
+    const unit = UnitAdapter.pintUnitToJsConverterUnit(stick.levels[0].wind_velocity.east.unit);
+    return getWindIntensityColor(magnitude, unit);
+}
+
+/**
+ * Select the ballistic wind bar width for the view
+ * @param {object} state - The redux state
+ * @returns {number} Width of the graphic
+ */
+export function selectBallisticWindBarWidth(state) {
+    const weatherRows = selectWeatherRows(state);
+    const magnitude = selectBallisticWind(state).ballisticMagnitude;
+    const maxMagnitude = _.max(weatherRows.map((currentLevel) => currentLevel.magnitude));
+    return (magnitude / maxMagnitude) * 135;
+}
+
+/**
+ * Select whether or not the forecast is older than 6 hours
+ * @param {object} state - The redux state
+ * @returns {string} - True if the forecast is old
+ */
+export function selectForecastIsOld(state) {
+    const initTime = selectForecastInitializationTime(state);
+    const timeNow = moment.utc();
+    const timeDiff = moment.duration(timeNow.diff(initTime))
+        .asHours();
+    return timeDiff > 6;
+}
+
+/**
+ * Select forecast initialization time
+ * @param {object} state - The redux state
+ * @returns {string} - The initialization time string
+ */
+export function selectForecastInitializationTime(state) {
+    if (!exists(state.releasePasses[0].weather)) {
+        return null;
+    }
+
+    return state.releasePasses[0].weather.sticks[0].initialization_time;
+}
+
+/**
+ * Select the string to describe the release altitude in different reference frames
+ * @param {object} state - The redux state
+ * @param {number} elevation - The elevation
+ * @returns {string} The string to display for altitude in MSL and AGL
+ */
+export function selectAltitudeReportString(state, elevation) {
+    const dropAltitude = state.releasePasses[0].release.point.up;
+    const {
+        datum,
+        value
+    } = dropAltitude;
+
+    const altitudeMsl = (datum === 'MSL')
+        ? value
+        : convertFtAGLtoFtMSL(value, elevation);
+    const altitudeAgl = (datum === 'MSL')
+        ? convertFtMSLtoFtAGL(value, elevation)
+        : value;
+
+    return `${altitudeMsl} feet MSL (${altitudeAgl} feet AGL)`;
+}
+"
+
+============================================================
+[MSG-0044] [2026-01-07 10:09:24]
+============================================================
+The simple_pdf_test.py will have to be called from the venv
+source venv/scripts/acvtivate
+
+============================================================
+[MSG-0045] [2026-01-07 10:12:44]
+============================================================
+Could you confirm the magnetic Runnin calculation? The new report now shows 355 where as the old report showed 7 degrees magnetic
+
+Does this Code help you at all?
+
+// ---------------------------------------------------------------------------
+// <copyright file="Direction.cs" company="MORSECORP, Inc.">
+// 
+// COPYRIGHTS AND PERMISSIONS:
+// Copyright 2019 MORSECORP, Inc. All rights reserved.
+// Subject to any rights the U.S. Government may have in the Software,
+// permission is granted to the person rightfully obtaining a copy of this
+// Software from MORSECORP, Inc. to use, copy, modify and distribute the
+// Software only as expressly authorized in writing from MORSECORP, Inc.
+// The above copyright notice and this permission notice shall be included
+// in all permitted copies or substantial portions of the Software.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// </copyright>
+// ---------------------------------------------------------------------------
+
+namespace JpadsWeb.Api.Models.Geospatial
+{
+    #region Using Statements
+
+    using System;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using JpadsWeb.Geospatial.Models;
+    using Interfaces;
+    using Newtonsoft.Json;
+    using UnitsNet;
+
+    #endregion
+
+    /// <summary>
+    ///     A class for representing direction as an immutable data object
+    /// </summary>
+    public class Direction
+    {
+        private readonly IWorldMagneticModel worldMagneticModel;
+        
+        [NotMapped]
+        [JsonIgnore]
+        public GeoPoint CenterPoint { get; set; }
+
+        [Key]
+        [JsonIgnore]
+        public int DirectionId { get; set; }
+
+        public Direction()
+        {
+        }
+
+        public Direction(
+            SerializedDirection direction,
+            GeoPoint centerPoint,
+            IWorldMagneticModel worldMagneticModel = null,
+            DateTime? dateTime = null)
+        {
+            this.CenterPoint = centerPoint;
+            this.worldMagneticModel = worldMagneticModel ?? new WorldMagneticModel(new Wgs84EarthModel());
+            this.Datum = direction.Unit == SerializedDirection.DirectionUnits.DegreesMagnetic ? DirectionDatum.Magnetic : DirectionDatum.True;
+            this.Value = Angle.FromDegrees(direction.Value);
+            this.DateTime = dateTime ?? DateTime.UtcNow;
+            this.CenterPoint = centerPoint ?? new GeoPoint
+            {
+                Latitude = Angle.Zero, Longitude = Angle.Zero, Altitude = new Altitude(0, SupportedAltitudeUnits.MMsl)
+            };
+        }
+        
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="Direction" /> class.
+        /// </summary>
+        /// <param name="value">
+        /// </param>
+        /// <param name="datum">
+        /// </param>
+        /// <param name="worldMagneticModel"></param>
+        /// <param name="centerPoint"></param>
+        /// <param name="dateTime"></param>
+        public Direction(
+            Angle value,
+            DirectionDatum datum,
+            GeoPoint centerPoint,
+            IWorldMagneticModel worldMagneticModel = null,
+            DateTime? dateTime = null)
+        {
+            this.CenterPoint = centerPoint;
+            this.worldMagneticModel = worldMagneticModel ?? new WorldMagneticModel(new Wgs84EarthModel());
+            this.Datum = datum;
+            this.DateTime = dateTime ?? DateTime.UtcNow;
+            this.CenterPoint = centerPoint ?? new GeoPoint
+            {
+                Latitude = Angle.Zero, Longitude = Angle.Zero, Altitude = new Altitude(0, SupportedAltitudeUnits.MMsl)
+            };
+             
+            switch (this.Datum)
+            {
+                case DirectionDatum.Magnetic:
+                    this.Value = Angle.FromRadians(this.worldMagneticModel.MagneticToTrue(
+                        value.Radians,
+                        this.CenterPoint.ToGeoLibraryGeoPoint(),
+                        this.DateTime));
+                    break;
+                case DirectionDatum.True:
+                     this.Value = value;
+                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+           
+        }
+
+        [JsonIgnore]
+        public DateTime DateTime { get; set; }
+
+        /// <summary>
+        ///     The direction reference datum
+        /// </summary>
+        [JsonIgnore]
+        public DirectionDatum Datum { get; set; } = DirectionDatum.True;
+
+        /// <summary>
+        ///     The direction stored as degrees magnetic
+        /// </summary>
+        [JsonProperty(PropertyName = "degreesMagnetic")]
+        public double DegreesMagnetic => Angle.FromRadians(this.ToRadiansMagnetic(this.CenterPoint, this.DateTime)).Degrees;
+
+        /// <summary>
+        ///     The direction stored as degrees true
+        /// </summary>
+        [JsonProperty(PropertyName = "degreesTrue")]
+        public double DegreesTrue => this.Value.Degrees;
+
+        /// <summary>
+        ///     The direction value
+        /// </summary>
+        [JsonIgnore]
+        public double ValueRadiansTrue { get; set; }
+
+        /// <summary>
+        ///     The direction value
+        /// </summary>
+        [NotMapped]
+        [JsonIgnore]
+        public Angle Value
+        {
+            get => Angle.FromRadians(this.ValueRadiansTrue);
+            set => this.ValueRadiansTrue = value.Radians;
+        }
+        
+        [NotMapped]
+        [JsonIgnore]
+        public double ValueDegrees
+        {
+            get => Angle.FromRadians(this.ValueRadiansTrue).Degrees;
+            set => this.ValueRadiansTrue = Angle.FromRadians(value).Degrees;
+        }
+
+        /// <summary>
+        ///     Converts the direction to radians true
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="double" />.
+        /// </returns>
+        public double ToRadiansTrue(
+            GeoPoint centerPoint,
+            DateTime? startTime = null)
+        {
+            switch (this.Datum)
+            {
+                case DirectionDatum.True:
+                    return this.Value.Radians;
+                case DirectionDatum.Magnetic:
+                    return this.worldMagneticModel?.MagneticToTrue(
+                        this.Value.Radians,
+                        centerPoint.ToGeoLibraryGeoPoint() ?? this.CenterPoint.ToGeoLibraryGeoPoint(),
+                        startTime ?? DateTime.UtcNow) ?? this.Value.Radians;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        /// <summary>
+        ///     Converts the direction to radians true
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="double" />.
+        /// </returns>
+        public double ToRadiansMagnetic(
+            GeoPoint centerPoint,
+            DateTime? startTime = null)
+        {
+            switch (this.Datum)
+            {
+                case DirectionDatum.True:
+                    return this.worldMagneticModel?.TrueToMagnetic(
+                        this.Value.Radians,
+                        centerPoint.ToGeoLibraryGeoPoint() ?? this.CenterPoint?.ToGeoLibraryGeoPoint() ?? new JpadsWeb.Geospatial.GeoPoint(0,0,0),
+                        startTime ?? DateTime.UtcNow) ?? this.Value.Radians;
+                case DirectionDatum.Magnetic:
+                    return this.Value.Radians;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        
+        public enum AngleUnits
+        {
+            Degrees,
+            Radians
+        }
+        
+        public enum DirectionDatum
+        {
+            True,
+            Magnetic
+        }
+    }
+}
+
+What else would you need for me to create a correct solution?
+
+============================================================
+[MSG-0046] [2026-01-07 10:19:00]
+============================================================
+Are you saying you beleive the way you are calculating magnetic runnin is more correct than the old way?
+
+============================================================
+[MSG-0047] [2026-01-07 10:23:15]
+============================================================
+make sure youre doing these pip installs inside of the virtual environment.
+continue from where you left off
+
+============================================================
+[MSG-0048] [2026-01-07 10:27:43]
+============================================================
+very good. This is wonderful. Please include a small professional disclaimer in the disclaimer and nots section if magnetic was calculated using WMM or if it had to fall back to the simpler model. Also include code to convert from magetic to true if the .json data contains a magnetic runnin instead of a true runnin angle.
+
+============================================================
+[MSG-0049] [2026-01-07 10:31:27]
+============================================================
+update the unit tests for all changed and new code
+
+============================================================
+[MSG-0050] [2026-01-07 13:25:09]
+============================================================
+I just wanted to verify that the personel section of the exit order is only printed if there is personel data in the .json. Otherwise do not generate that section
+Otherwise this looks much better, one thing to note: It seems the runnin for release pass 2 isnt correct and its the same as release pass 1. verify and fix this
+
+============================================================
+[MSG-0051] [2026-01-07 13:27:34]
+============================================================
+Great, the next issue is the imagery thats downloaded has lots of mosaic artifacts and clouds that make the ground hard to see. Could you verify and fix this.
+
+============================================================
+[MSG-0052] [2026-01-07 13:29:28]
+============================================================
+As you noticed, there still seems to be a lot of clouds in this imagery. Is there any other possible solution for this?
+
+============================================================
+[MSG-0053] [2026-01-07 13:40:43]
+============================================================
+Theres an issue with exit order where the personel are not being appended to the end of the exit order table like I asked. Verify and fix this.
+
+============================================================
+[MSG-0054] [2026-01-07 13:43:58]
+============================================================
+I had changed simplepdf for the time being as I was doing some testing. Feel free to change it back. The issue is even after the changes you just made. It complicates the program, and worse, the personel table does not look like its being put in the pdf
+
+============================================================
+[MSG-0055] [2026-01-07 13:47:52]
+============================================================
+again the personel tables are not being put in the pdf. This may be due to the overcomplication of the table generator. Id like this to be able to be changed by other developers in the future if it needs to be.
+Therefore, lets have Exit Order table and personel exit order be two seperate tables.
+
+Another Issue is that the runnin line generated in the second release pass is incorrect. Again sharing the same runnin as release pass 1 but this is incorrect since the runnin for release pass 2 is different. Verify and fix this.
+
+============================================================
+[MSG-0056] [2026-01-07 13:58:01]
+============================================================
+Personel arent specific to a singular drop within a release pass. They come after all the JPADS units exit. So, if there are 3 JPADS units in the release pass. the next 3 jumpers would have Exit number 4, 5, 6
+
+============================================================
+[MSG-0057] [2026-01-07 14:01:07]
+============================================================
+Good the map looks correct now and the table is almost correct but is now displaying in the pdf which is a win.
+in the personel exit table, delay (s) should not be hardcoded and instead foudn within the json for this field.
+
+============================================================
+[MSG-0058] [2026-01-07 14:05:36]
+============================================================
+the jpadsToJumperDelay should be the value used
+
+============================================================
+[MSG-0059] [2026-01-07 14:07:10]
+============================================================
+sorry jpadsToJumperDelay should be used for the first personel delay (s) then the following personel should use jumpertojumperdelay
+
+============================================================
+[MSG-0060] [2026-01-07 14:08:57]
+============================================================
+update the read me and project context accordingly.
+
+Then lets try to fix this cloud cover issue. Could you try to use a cql filter like the following to provide cloudless imagery:
+{"cql_filter": "cloudCover<.1"}
+
+============================================================
+[MSG-0061] [2026-01-07 14:13:00]
+============================================================
+good that worked, there is no longer cloud coverage in the imagery. 
+
+Update any unit tests that need to be updated due to any code you recently changed.
+
+============================================================
+[MSG-0062] [2026-01-07 14:17:14]
+============================================================
+not that I'm uploading the project right now but when i put this project up on gitlab do i need to include any of the .json files in the LOGS folder in oder for the unit tests or any additional fuctionality to work?
+
+Id also like you to verify there are no artifacts left over from when the incorrect ArcticLightnightDZ.json format was uploaded.
+
+============================================================
+[MSG-0063] [2026-01-07 14:18:17]
+============================================================
+sure provide a summary
+
+============================================================
+[MSG-0064] [2026-01-07 15:11:09]
+============================================================
+even though the ground level for the JUDY.json is 100 could you interpolate the winds to whole 1000s (9000, 8000, 7000, 6000, 5000, 4000, 3000, 2000, 1000, 100). This should hold true even when generating a report from arcticDZ.json (please do this after confirming the correct altutitudes are dispalying with judyDZ)
+
+============================================================
+[MSG-0065] [2026-01-07 15:14:07]
+============================================================
+judydz looks correct, now generate one using arcticdz.json
+
+============================================================
+[MSG-0066] [2026-01-07 15:17:39]
+============================================================
+could you remove more white space between the title of the continued page and the Title of Airdrop damage estimation. Additoinally remove white space between the bottom of the ADE table and the wind estimates title. Also move the "weather forcasted on" line and wind esitmates table up as the "weather forcasted on line" will not interfere with the wind estimates title due to it being center alligned.
+
+============================================================
+[MSG-0067] [2026-01-07 15:19:32]
+============================================================
+go back to the arcticdz.json data set. its a bit more tricky than the judydz and is easier to see how it will handle harder data sets
+
+============================================================
+[MSG-0068] [2026-01-07 15:23:32]
+============================================================
+looks good, you can make the height of the rows in the wind esitmates table every so slightly bigger, the tips of the arrows are overlapping the dividing lines when close to 0/360 degrees
+
+============================================================
+[MSG-0069] [2026-01-07 15:27:31]
+============================================================
+reduce white space between title and ADE table title, reduce white space between bottom of ADE section and Wind estimates title. remove white space between bottom of wind estimates title and top of wind estimates table
+
+============================================================
+[MSG-0070] [2026-01-07 15:30:31]
+============================================================
+is the color of the cells within the exit order table darker than the cells of other tables? The color of the cells should be the same for all tables.
+
+============================================================
+[MSG-0071] [2026-01-07 15:32:42]
+============================================================
+please check if the colors are uniform between all respective areas of the different tables
+
+============================================================
+[MSG-0072] [2026-01-07 15:39:18]
+============================================================
+continue
+
+============================================================
+[MSG-0073] [2026-01-07 16:15:23]
+============================================================
+when there are no hazards, sometimes the map zooms in too much and you cant see the LAR or failure foot print cicrles like in zayed.json. Could you add a fix for this without changing how it otherwise does zoom level, as i like how it normally does zoom level I just want the LAR and faiure footprint to be in the report always as its important
+
+============================================================
+[MSG-0074] [2026-01-07 16:18:33]
+============================================================
+while there is part of the LAR and failure foot print now could you zoom it out a bit more so more of the LAR and failrure footprint are visible?
+
+============================================================
+[MSG-0075] [2026-01-07 16:44:32]
+============================================================
+could you look into the avg. ballistic wind again. for example im getting 6 with an angle of 258 with the old report generator for collidgedz.json
+
+============================================================
+[MSG-0076] [2026-01-07 16:45:34]
+============================================================
+then why does the new report display 5 magnitude and 255 avg.
+
+============================================================
+[MSG-0077] [2026-01-07 16:51:35]
+============================================================
+good, now modify simple_pdf gen script to recive the json as input to the script and create pdfs for isalndFoxDZ, ColllidgeDZ, arcticDZ, judydz, and zayed

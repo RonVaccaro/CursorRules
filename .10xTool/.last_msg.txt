@@ -1,0 +1,1 @@
+good, now modify simple_pdf gen script to recive the json as input to the script and create pdfs for isalndFoxDZ, ColllidgeDZ, arcticDZ, judydz, and zayed

@@ -1,0 +1,67 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+### Interactive Task Loop with File-Based User Feedback
+
+Enable continuous conversation with the user through file-based input between tool calls.
+
+---
+
+#### 1. **Keyboard Shortcuts**
+
+| Action | Shortcut |
+|--------|----------|
+| Focus Agent Window | `Ctrl+Shift+Space` |
+| Accept Agent Command | `Enter` (when agent focused) |
+| Return to File Editor | `Ctrl+1` |
+
+---
+
+#### 2. **Folder Structure**
+
+All conversation files in `.10xTool/`:
+
+```
+.10xTool/
+  userinput.py        # Reads and logs messages
+  user_response.txt   # User writes messages here
+  conversation_log.txt # Persistent log of all messages
+  .last_msg.txt       # Tracks last-read message (auto)
+  .msg_counter.txt    # Message counter (auto)
+  README.md           # Usage instructions
+```
+
+---
+
+#### 3. **Workflow**
+
+1. **User** writes message in `.10xTool/user_response.txt` and saves
+2. **Agent** runs:
+   ```powershell
+   Start-Sleep -Seconds 1; python .10xTool/userinput.py
+   ```
+3. **User** accepts with: `Ctrl+Shift+Space` then `Enter`
+4. **Agent** reads output:
+   - `[MSG-XXXX]` = new message with tag and timestamp
+   - `[NO NEW MESSAGE]` = user hasn't updated the file
+   - `[WAITING]` = file is empty
+5. **Agent** responds and continues work
+6. **User** returns to editor with `Ctrl+1`
+7. **Repeat**
+
+---
+
+#### 4. **Reading Conversation History**
+
+```powershell
+Get-Content .10xTool/conversation_log.txt
+```
+
+---
+
+#### 5. **Exit Condition**
+
+If user writes `"stop"` in user_response.txt, acknowledge and end the conversation loop.
